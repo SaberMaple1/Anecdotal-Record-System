@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Guidance Portal | CDL-SHS</title>
+    <link rel="icon" href="logo.png" /><link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-portal="guidance">
+    <section id="loginPage" class="auth">
+      <div class="auth-side">
+        <div class="school-mark"><img src="logo.png" alt="Crecencia Drucila Lopez Senior High School logo"></div>
+        <h1>Crecencia Drucila Lopez Senior High School</h1>
+        <span class="auth-badge">Guidance Portal</span>
+      </div>
+      <div class="auth-main">
+        <div class="auth-card">
+          <a class="back-link" href="index.html">&larr; Back</a>
+          <h2 id="authHeading">Sign in</h2>
+          <form id="loginForm" novalidate>
+            <div class="field">
+              <label for="email">School email</label
+              ><input
+                id="email"
+                type="email"
+                placeholder="name@cdlshs.edu.ph"
+                autocomplete="username"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <div class="password-wrap">
+                <input
+                  id="password"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                /><button type="button" id="showPassword" class="show-pass">
+                  Show
+                </button>
+              </div>
+            </div>
+            <div id="loginMessage" class="message"></div>
+            <button id="loginButton" class="btn btn-primary full">
+              Sign in
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+    <section id="appPage" class="app hidden">
+      <aside class="sidebar">
+        <div class="side-brand">
+          <div class="mini-mark"><img src="logo.png" alt="CDL-SHS logo"></div>
+          <div><strong>CDL-SHS</strong><small>GUIDANCE PORTAL</small></div>
+        </div>
+        <nav class="side-nav">
+          <button class="nav-btn" data-view="guidanceHome">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"
+              /></svg
+            ><span>Dashboard</span></button
+          ><button class="nav-btn" data-view="caseRecords">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+              /></svg
+            ><span>All Cases</span></button
+          ><button class="nav-btn" id="exportNav">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg
+            ><span>Export PDF</span></button
+          ><button class="nav-btn" data-view="settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0" />
+              <circle cx="16" cy="6" r="2" />
+              <circle cx="8" cy="12" r="2" />
+              <circle cx="18" cy="18" r="2" /></svg
+            ><span>Settings</span>
+          </button>
+        </nav>
+      </aside>
+      <main class="main">
+        <div class="topbar">
+          <div class="welcome">
+            <h2 id="welcomeTitle"></h2>
+            <p id="todayText"></p>
+          </div>
+          <div class="top-actions">
+            <div class="user-chip">
+              <div id="avatar" class="avatar"></div>
+              <div>
+                <strong id="currentUser"></strong
+                ><small id="currentRole"></small>
+              </div>
+            </div>
+            <button id="logoutBtn" class="btn btn-soft btn-sm">Sign out</button>
+          </div>
+        </div>
+        <div id="guidanceHome" class="app-view hidden">
+          <div class="banner"><h3>Guidance Dashboard</h3></div>
+          <div id="guidanceStats" class="stats"></div>
+          <div class="dash-grid">
+            <div class="card">
+              <h4>Pending Cases</h4>
+              <div id="pendingQueue"></div>
+            </div>
+            <div class="card">
+              <h4>Records by Category</h4>
+              <div id="categorySummary"></div>
+            </div>
+          </div>
+        </div>
+        <div id="caseRecords" class="app-view hidden">
+          <div class="view-title">
+            <h3>All Cases</h3>
+            <button id="exportTop" class="btn btn-primary">Export PDF</button>
+          </div>
+          <div class="card">
+            <div class="toolbar">
+              <div class="field">
+                <label for="search">Search records</label
+                ><input
+                  id="search"
+                  placeholder="Student ID, name, section, or category"
+                />
+              </div>
+              <div class="field">
+                <label for="statusFilter">Review status</label
+                ><select id="statusFilter">
+                  <option value="all">All statuses</option>
+                  <option>Pending Review</option>
+                  <option>Reviewed</option>
+                </select>
+              </div>
+            </div>
+            <div id="guidanceTable"></div>
+          </div>
+        </div>
+        <div id="settings" class="app-view hidden">
+          <div class="view-title"><h3>Settings</h3></div>
+          <div class="grid-2">
+            <div class="card">
+              <h4>Profile</h4>
+              <div class="profile-row">
+                <div id="settingsAvatar" class="avatar avatar-lg"></div>
+                <div>
+                  <div class="form-actions" style="margin: 0">
+                    <label for="avatarInput" class="btn btn-primary btn-sm"
+                      >Change photo</label
+                    ><input
+                      id="avatarInput"
+                      type="file"
+                      accept="image/*"
+                      class="visually-hidden"
+                    /><button
+                      id="removeAvatar"
+                      type="button"
+                      class="btn btn-soft btn-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <small class="hint">A square image works best.</small>
+                </div>
+              </div>
+              <div class="field">
+                <label for="displayName">Full name</label
+                ><input id="displayName" maxlength="60" />
+              </div>
+              <button
+                id="saveName"
+                type="button"
+                class="btn btn-primary btn-sm"
+              >
+                Save name
+              </button>
+              <div id="profileMessage" class="message"></div>
+            </div>
+            <div class="card">
+              <h4>Account information</h4>
+              <dl id="infoList" class="info-list"></dl>
+            </div>
+          </div>
+          <div class="card">
+            <h4>Security</h4>
+            <div class="field" style="max-width: 320px">
+              <label for="timeoutSelect"
+                >Sign out automatically after inactivity</label
+              ><select id="timeoutSelect">
+                <option value="5">5 minutes</option>
+                <option value="10">10 minutes</option>
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+            </div>
+            <small class="hint"
+              >Switching to another tab or app does not sign you out. Only time
+              spent inactive on this page counts.</small
+            >
+          </div>
+          <div class="card">
+            <h4>Create account</h4>
+            <form id="accountForm" novalidate>
+              <div class="grid-2">
+                <div class="field">
+                  <label for="acName">Full name</label
+                  ><input id="acName" maxlength="60" />
+                </div>
+                <div class="field">
+                  <label for="acEmail">School email</label
+                  ><input
+                    id="acEmail"
+                    type="email"
+                    placeholder="name@cdlshs.edu.ph"
+                  />
+                </div>
+                <div class="field">
+                  <label for="acPassword">Temporary password</label
+                  ><input
+                    id="acPassword"
+                    type="password"
+                    autocomplete="new-password"
+                  />
+                </div>
+                <div class="field">
+                  <label for="acRole">Account type</label
+                  ><select id="acRole">
+                    <option value="teacher">Teacher</option>
+                    <option value="guidance">Guidance Admin</option>
+                  </select>
+                </div>
+              </div>
+              <div id="accountMessage" class="message"></div>
+              <button class="btn btn-primary">Create account</button>
+            </form>
+          </div>
+          <div class="card">
+            <h4>All accounts</h4>
+            <div id="accountTable"></div>
+          </div>
+        </div>
+      </main>
+      <div id="idleWarn" class="idle-warn hidden" role="alert">
+        <span>Signing out in <b id="idleSecs">60</b>s due to inactivity.</span
+        ><button id="stayBtn" class="btn btn-primary btn-sm">
+          Stay signed in
+        </button>
+      </div>
+    </section>
+    <script src="lib/jspdf.umd.min.js"></script>
+    <script src="lib/jspdf.plugin.autotable.min.js"></script>
+    <script src="store.js"></script>
+    <script src="ui.js"></script>
+    <script src="pages.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
