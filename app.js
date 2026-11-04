@@ -168,13 +168,29 @@ document
   .querySelectorAll(".nav-btn[data-view]")
   .forEach((b) => (b.onclick = () => showView(b.dataset.view)));
 
+/* ---------- teacher: student search ---------- */
+if ($("teacherSearchBtn")) {
+  $("teacherSearchBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    try {
+      teacherLookup();
+    } catch (err) {
+      console.error("Search failed:", err);
+      const out = $("teacherSearchResult");
+      out.className = "lookup-result none";
+      out.textContent = "Search error: " + err.message;
+    }
+  });
+  $("teacherStudentSearch").addEventListener(
+    "keydown",
+    (e) => e.key === "Enter" && $("teacherSearchBtn").click(),
+  );
+}
+
 /* ---------- teacher: new record ---------- */
 if ($("recordForm")) {
   $("incidentDate").max = today();
   $("recordForm").addEventListener("reset", () => clearMsg($("formMessage")));
-  $("teacherSearchBtn").onclick = teacherLookup;
-  $("teacherStudentSearch").onkeydown = (e) =>
-    e.key === "Enter" && teacherLookup();
   $("recordForm").onsubmit = (e) => {
     e.preventDefault();
     clearMsg($("formMessage"));
