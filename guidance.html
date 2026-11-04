@@ -68,6 +68,10 @@
                 d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
               /></svg
             ><span>All Cases</span></button
+          ><button class="nav-btn" data-view="trashView">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg
+            ><span>Trash</span></button
           ><button class="nav-btn" id="exportNav">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" /></svg
@@ -137,6 +141,20 @@
               </div>
             </div>
             <div id="guidanceTable"></div>
+          </div>
+        </div>
+        <div id="trashView" class="app-view hidden">
+          <div class="view-title">
+            <h3>Trash</h3>
+            <button id="emptyTrashBtn" class="btn btn-danger">Empty Trash</button>
+          </div>
+          <div class="card">
+            <small class="hint"
+              >Records deleted from All Cases are kept here and are hidden from
+              teachers. Restore a record to bring it back, or delete it
+              permanently.</small
+            >
+            <div id="trashTable"></div>
           </div>
         </div>
         <div id="settings" class="app-view hidden">
@@ -244,6 +262,36 @@
           </div>
         </div>
       </main>
+      <div
+        id="reviewModal"
+        class="modal-backdrop hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reviewTitle"
+      >
+        <div class="modal-card">
+          <h4 id="reviewTitle">Mark as Reviewed</h4>
+          <p id="reviewSummary" class="hint"></p>
+          <div class="field">
+            <label for="reviewComment">Action taken / comment (required)</label>
+            <textarea
+              id="reviewComment"
+              rows="4"
+              maxlength="500"
+              placeholder="Describe the action taken or your comment for the teacher..."
+            ></textarea>
+          </div>
+          <div id="reviewMessage" class="message"></div>
+          <div class="form-actions">
+            <button id="reviewCancel" type="button" class="btn btn-soft">
+              Cancel
+            </button>
+            <button id="reviewSave" type="button" class="btn btn-primary">
+              Mark as Reviewed
+            </button>
+          </div>
+        </div>
+      </div>
       <div id="idleWarn" class="idle-warn hidden" role="alert">
         <span>Signing out in <b id="idleSecs">60</b>s due to inactivity.</span
         ><button id="stayBtn" class="btn btn-primary btn-sm">
@@ -253,9 +301,9 @@
     </section>
     <script src="lib/jspdf.umd.min.js"></script>
     <script src="lib/jspdf.plugin.autotable.min.js"></script>
-    <script src="store.js"></script>
-    <script src="ui.js"></script>
-    <script src="pages.js"></script>
-    <script src="app.js"></script>
+    <script src="store.js?v=3"></script>
+    <script src="ui.js?v=3"></script>
+    <script src="pages.js?v=3"></script>
+    <script src="app.js?v=3"></script>
   </body>
 </html>
