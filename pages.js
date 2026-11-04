@@ -2,25 +2,114 @@
 
 /* ===== PAGES: record actions, lookup, accounts, PDF export ===== */
 
+let reviewingId = null;
+
 function toggleStatus(id) {
   if (!session || session.role !== "guidance") return;
   const r = getRecords();
   const x = r.find((y) => y.id === id);
-  if (x) {
-    x.status = x.status === "Reviewed" ? "Pending Review" : "Reviewed";
+  if (!x) return;
+  if (x.status === "Reviewed") {
+    // Reopen: back to pending, previous review comment is cleared
+    x.status = "Pending Review";
+    delete x.reviewComment;
+    delete x.reviewedBy;
+    delete x.reviewedAt;
     saveRecords(r);
     renderAll();
+  } else {
+    openReview(id);
   }
 }
 
+function openReview(id) {
+  const x = getRecords().find((y) => y.id === id);
+  if (!x) return;
+  reviewingId = id;
+  $("reviewSummary").textContent = `${x.studentName} (${x.studentId}) \u2014 ${x.category}`;
+  $("reviewComment").value = "";
+  clearMsg($("reviewMessage"));
+  $("reviewModal").classList.remove("hidden");
+  $("reviewComment").focus();
+}
+
+function closeReview() {
+  reviewingId = null;
+  $("reviewModal").classList.add("hidden");
+}
+
+function submitReview() {
+  if (!session || session.role !== "guidance" || reviewingId === null) return;
+  const comment = clean($("reviewComment").value);
+  if (!comment)
+    return msg(
+      $("reviewMessage"),
+      "Please enter the action taken or a comment before marking as reviewed.",
+      "error",
+    );
+  const r = getRecords();
+  const x = r.find((y) => y.id === reviewingId);
+  if (!x) return closeReview();
+  x.status = "Reviewed";
+  x.reviewComment = comment;
+  x.reviewedBy = session.name;
+  x.reviewedAt = new Date().toISOString();
+  saveRecords(r);
+  closeReview();
+  renderAll();
+}
+
+/* Delete moves a record to Trash (hidden from teachers); it can be restored. */
 function deleteRecord(id) {
   if (
     !session ||
     session.role !== "guidance" ||
-    !confirm("Permanently delete this record?")
+    !confirm(
+      "Move this record to Trash? Teachers will no longer see it, but you can restore it from the Trash page.",
+    )
+  )
+    return;
+  const r = getRecords();
+  const x = r.find((y) => y.id === id);
+  if (!x) return;
+  x.deletedAt = new Date().toISOString();
+  x.deletedBy = session.name;
+  saveRecords(r);
+  renderAll();
+}
+
+function restoreRecord(id) {
+  if (!session || session.role !== "guidance") return;
+  const r = getRecords();
+  const x = r.find((y) => y.id === id);
+  if (!x) return;
+  delete x.deletedAt;
+  delete x.deletedBy;
+  saveRecords(r);
+  renderAll();
+}
+
+function purgeRecord(id) {
+  if (
+    !session ||
+    session.role !== "guidance" ||
+    !confirm("Permanently delete this record? This cannot be undone.")
   )
     return;
   saveRecords(getRecords().filter((r) => r.id !== id));
+  renderAll();
+}
+
+function emptyTrash() {
+  if (!session || session.role !== "guidance") return;
+  if (!trashRecords().length) return alert("Trash is already empty.");
+  if (
+    !confirm(
+      "Permanently delete ALL records in Trash? This cannot be undone.",
+    )
+  )
+    return;
+  saveRecords(getRecords().filter((r) => !r.deletedAt));
   renderAll();
 }
 
@@ -43,7 +132,7 @@ function teacherLookup() {
       "<strong>Enter at least 2 characters.</strong><br><small>Use the student ID or name.</small>";
     return;
   }
-  const mine = getRecords().filter(
+  const mine = activeRecords().filter(
     (r) => String(r.createdBy).toLowerCase() === String(session.email).toLowerCase(),
   );
   const matches = mine.filter(
@@ -111,6 +200,7 @@ function exportPDF() {
         "Action Taken",
         "Recorded By",
         "Status",
+        "Guidance Comment",
       ],
     ],
     body: rows.map((r) => [
@@ -123,6 +213,7 @@ function exportPDF() {
       r.actionTaken,
       r.teacherName,
       r.status,
+      r.reviewComment || "",
     ]),
     styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
     headStyles: { fillColor: [59, 42, 138] },
