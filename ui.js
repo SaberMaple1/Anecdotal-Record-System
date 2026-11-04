@@ -66,7 +66,7 @@ function showView(id) {
 }
 
 function visible() {
-  let r = getRecords();
+  let r = activeRecords();
   if (session && session.role === "teacher")
     r = r.filter((x) => x.createdBy === session.email);
   const q = $("search") ? clean($("search").value).toLowerCase() : "";
@@ -104,7 +104,10 @@ function tableHTML(rows, controls = false) {
       cell("Category", esc(x.category)) +
       cell(
         "Observation",
-        `${esc(x.observation)}<br><small><b>Action:</b> ${esc(x.actionTaken)}</small>`,
+        `${esc(x.observation)}<br><small><b>Action:</b> ${esc(x.actionTaken)}</small>` +
+          (reviewed && x.reviewComment
+            ? `<div class="review-note"><b>Guidance comment:</b> ${esc(x.reviewComment)}<br><small>${esc(x.reviewedBy || "Guidance")}${x.reviewedAt ? " &middot; " + new Date(x.reviewedAt).toLocaleDateString("en-PH") : ""}</small></div>`
+            : ""),
       ) +
       cell("Submitted by", esc(x.teacherName)) +
       cell(
@@ -114,7 +117,7 @@ function tableHTML(rows, controls = false) {
       (controls
         ? cell(
             "Controls",
-            `<div class="actions"><button class="btn btn-soft btn-sm" onclick="toggleStatus(${x.id})">${reviewed ? "Reopen" : "Review"}</button><button class="btn btn-danger btn-sm" onclick="deleteRecord(${x.id})">Delete</button></div>`,
+            `<div class="actions"><button class="btn btn-soft btn-sm" onclick="toggleStatus(${x.id})">${reviewed ? "Reopen" : "Review"}</button><button class="btn btn-danger btn-sm" onclick="deleteRecord(${x.id})">Move to Trash</button></div>`,
           )
         : "") +
       "</tr>";
@@ -122,9 +125,49 @@ function tableHTML(rows, controls = false) {
   return h + "</tbody></table></div>";
 }
 
+function trashHTML(rows) {
+  if (!rows.length) return '<div class="empty">Trash is empty.</div>';
+  const cell = (label, html) => `<td data-label="${label}">${html}</td>`;
+  let h =
+    '<div class="table-wrap"><table><thead><tr><th>Deleted</th><th>Student</th><th>Section</th><th>Category</th><th>Observation / Action</th><th>Submitted By</th><th>Status</th><th>Controls</th></tr></thead><tbody>';
+  rows.forEach((x) => {
+    h +=
+      "<tr>" +
+      cell(
+        "Deleted",
+        esc(new Date(x.deletedAt).toLocaleDateString("en-PH")) +
+          (x.deletedBy ? `<br><small>${esc(x.deletedBy)}</small>` : ""),
+      ) +
+      cell(
+        "Student",
+        `<strong>${esc(x.studentName)}</strong><br>${esc(x.studentId)}`,
+      ) +
+      cell("Section", esc(x.gradeSection)) +
+      cell("Category", esc(x.category)) +
+      cell(
+        "Observation",
+        `${esc(x.observation)}<br><small><b>Action:</b> ${esc(x.actionTaken)}</small>` +
+          (x.reviewComment
+            ? `<div class="review-note"><b>Guidance comment:</b> ${esc(x.reviewComment)}</div>`
+            : ""),
+      ) +
+      cell("Submitted by", esc(x.teacherName)) +
+      cell(
+        "Status",
+        `<span class="badge ${x.status === "Reviewed" ? "reviewed" : "pending"}">${esc(x.status)}</span>`,
+      ) +
+      cell(
+        "Controls",
+        `<div class="actions"><button class="btn btn-soft btn-sm" onclick="restoreRecord(${x.id})">Restore</button><button class="btn btn-danger btn-sm" onclick="purgeRecord(${x.id})">Delete Forever</button></div>`,
+      ) +
+      "</tr>";
+  });
+  return h + "</tbody></table></div>";
+}
+
 function renderAll() {
   if (!session) return;
-  const all = getRecords();
+  const all = activeRecords();
   if (PORTAL === "teacher") {
     const mine = all.filter((r) => r.createdBy === session.email);
     const month = today().slice(0, 7);
@@ -176,6 +219,7 @@ function renderAll() {
         : '<div class="empty">No category data yet.</div>',
     );
     setHTML("guidanceTable", tableHTML(visible(), true));
+    setHTML("trashTable", trashHTML(trashRecords()));
   }
 }
 
