@@ -34,30 +34,44 @@ function toggleAccount(email) {
 
 function teacherLookup() {
   if (!session || session.role !== "teacher") return;
-  const q = clean($("teacherStudentSearch").value).toLowerCase();
+  const norm = (v) => clean(String(v)).replace(/\s+/g, " ").toLowerCase();
+  const q = norm($("teacherStudentSearch").value);
   const out = $("teacherSearchResult");
   if (q.length < 2) {
     out.className = "lookup-result none";
     out.innerHTML =
-      "<strong>Enter at least 2 characters.</strong><br><small>Use the student ID or full name.</small>";
+      "<strong>Enter at least 2 characters.</strong><br><small>Use the student ID or name.</small>";
     return;
   }
-  const matches = getRecords().filter(
-    (r) =>
-      r.createdBy === session.email &&
-      (r.studentId.toLowerCase() === q ||
-        r.studentName.toLowerCase().includes(q)),
+  const mine = getRecords().filter(
+    (r) => String(r.createdBy).toLowerCase() === String(session.email).toLowerCase(),
+  );
+  const matches = mine.filter(
+    (r) => norm(r.studentId).includes(q) || norm(r.studentName).includes(q),
   );
   if (!matches.length) {
     out.className = "lookup-result none";
     out.innerHTML = `<strong>No matching record found</strong><br><small>You have not submitted a record matching "${esc(q)}". Check the spelling or Student ID.</small>`;
     return;
   }
-  const s = matches[0];
-  const reviewed = matches.filter((r) => r.status === "Reviewed").length;
+  // group matching records by student
+  const byStudent = new Map();
+  matches.forEach((r) => {
+    const key = norm(r.studentId);
+    if (!byStudent.has(key)) byStudent.set(key, []);
+    byStudent.get(key).push(r);
+  });
   out.className = "lookup-result found";
-  out.innerHTML = `<strong>Student record found</strong><br><span>${esc(s.studentName)} &middot; ${esc(s.studentId)} &middot; ${esc(s.gradeSection)}</span>
-    <div class="record-chips"><span class="record-chip">${matches.length} record${matches.length > 1 ? "s" : ""}</span><span class="record-chip">${reviewed} reviewed</span><span class="record-chip">${matches.length - reviewed} pending</span></div>`;
+  out.innerHTML =
+    `<strong>${byStudent.size} student${byStudent.size > 1 ? "s" : ""} found</strong>` +
+    [...byStudent.values()]
+      .map((list) => {
+        const s = list[0];
+        const reviewed = list.filter((r) => r.status === "Reviewed").length;
+        return `<div style="margin-top:10px"><span>${esc(s.studentName)} &middot; ${esc(s.studentId)} &middot; ${esc(s.gradeSection)}</span>
+    <div class="record-chips"><span class="record-chip">${list.length} record${list.length > 1 ? "s" : ""}</span><span class="record-chip">${reviewed} reviewed</span><span class="record-chip">${list.length - reviewed} pending</span></div></div>`;
+      })
+      .join("");
 }
 
 function exportPDF() {
