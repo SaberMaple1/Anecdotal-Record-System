@@ -168,38 +168,28 @@ document
   .querySelectorAll(".nav-btn[data-view]")
   .forEach((b) => (b.onclick = () => showView(b.dataset.view)));
 
-/* ---------- teacher: student search ---------- */
-if ($("teacherSearchBtn")) {
-  $("teacherSearchBtn").addEventListener("click", (e) => {
-    e.preventDefault();
-    try {
-      teacherLookup();
-    } catch (err) {
-      console.error("Search failed:", err);
-      const out = $("teacherSearchResult");
-      out.className = "lookup-result none";
-      out.textContent = "Search error: " + err.message;
-    }
-  });
-  $("teacherStudentSearch").addEventListener(
-    "keydown",
-    (e) => e.key === "Enter" && $("teacherSearchBtn").click(),
-  );
-}
-
 /* ---------- teacher: new record ---------- */
 if ($("recordForm")) {
   $("incidentDate").max = today();
   $("recordForm").addEventListener("reset", () => clearMsg($("formMessage")));
+  $("teacherSearchBtn").onclick = teacherLookup;
+  $("teacherStudentSearch").onkeydown = (e) =>
+    e.key === "Enter" && teacherLookup();
   $("recordForm").onsubmit = (e) => {
     e.preventDefault();
     clearMsg($("formMessage"));
     const ids = [
-      "studentId",
       "studentName",
+      "studentId",
+      "age",
+      "sex",
       "gradeSection",
-      "incidentDate",
+      "guardian",
+      "contactNumber",
       "category",
+      "incidentDate",
+      "incidentTime",
+      "location",
       "observation",
       "actionTaken",
     ];
@@ -209,12 +199,13 @@ if ($("recordForm")) {
         "Please complete every required field.",
         "error",
       );
-    if (!/^[A-Za-z0-9-]+$/.test(clean($("studentId").value)))
-      return msg(
-        $("formMessage"),
-        "Student ID may contain only letters, numbers, and hyphens.",
-        "error",
-      );
+    if (!/^\d{12}$/.test(clean($("studentId").value)))
+      return msg($("formMessage"), "LRN must be exactly 12 digits.", "error");
+    const age = Number($("age").value);
+    if (!Number.isInteger(age) || age < 5 || age > 99)
+      return msg($("formMessage"), "Enter a valid age.", "error");
+    if (!/^[0-9+()\-\s]{7,20}$/.test(clean($("contactNumber").value)))
+      return msg($("formMessage"), "Enter a valid contact number.", "error");
     if ($("incidentDate").value > today())
       return msg(
         $("formMessage"),
@@ -226,11 +217,19 @@ if ($("recordForm")) {
       id: Date.now(),
       studentId: clean($("studentId").value),
       studentName: clean($("studentName").value),
+      age,
+      sex: $("sex").value,
       gradeSection: clean($("gradeSection").value),
+      address: clean($("address").value),
+      guardian: clean($("guardian").value),
+      contactNumber: clean($("contactNumber").value),
       date: $("incidentDate").value,
+      time: $("incidentTime").value,
+      location: clean($("location").value),
       category: $("category").value,
       observation: clean($("observation").value),
       actionTaken: clean($("actionTaken").value),
+      recommendations: clean($("recommendations").value),
       createdBy: session.email,
       teacherName: session.name,
       status: "Pending Review",
@@ -252,20 +251,6 @@ if ($("search")) {
   $("search").oninput = $("statusFilter").onchange = renderAll;
   $("exportNav").onclick = $("exportTop").onclick = exportPDF;
 }
-
-
-/* ---------- guidance: review modal + trash ---------- */
-if ($("reviewModal")) {
-  $("reviewCancel").addEventListener("click", closeReview);
-  $("reviewSave").addEventListener("click", submitReview);
-  $("reviewModal").addEventListener("click", (e) => {
-    if (e.target === $("reviewModal")) closeReview();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && reviewingId !== null) closeReview();
-  });
-}
-if ($("emptyTrashBtn")) $("emptyTrashBtn").addEventListener("click", emptyTrash);
 
 /* ---------- settings ---------- */
 function fileToAvatar(file) {
@@ -373,12 +358,3 @@ if ($("accountForm")) {
     startIdleTimer();
   }
 })();
-
-/* ---------- keep dashboards in sync across tabs/windows ---------- */
-window.addEventListener("storage", (e) => {
-  if (e.key === KEYS.records || e.key === null) renderAll();
-});
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) renderAll();
-});
-window.addEventListener("focus", () => renderAll());

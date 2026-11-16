@@ -7,16 +7,13 @@
     <link rel="icon" href="logo.png" /><link rel="stylesheet" href="styles.css" />
   </head>
   <body data-portal="teacher">
-    <section id="loginPage" class="auth">
-      <div class="auth-side">
+    <section id="loginPage" class="auth auth-center">
+      <div class="auth-card">
+        <a class="back-link" href="index.html">&larr; Back</a>
         <div class="school-mark"><img src="logo.png" alt="Crecencia Drucila Lopez Senior High School logo"></div>
-        <h1>Crecencia Drucila Lopez Senior High School</h1>
+        <h1 class="auth-school">Crecencia Drucila Lopez Senior High School</h1>
         <span class="auth-badge">Teacher Portal</span>
-      </div>
-      <div class="auth-main">
-        <div class="auth-card">
-          <a class="back-link" href="index.html">&larr; Back</a>
-          <h2 id="authHeading">Sign in</h2>
+        <h2 id="authHeading">Sign in</h2>
           <form id="loginForm" novalidate>
             <div class="field">
               <label for="email">School email</label
@@ -88,7 +85,6 @@
             </button>
           </p>
         </div>
-      </div>
     </section>
     <section id="appPage" class="app hidden">
       <aside class="sidebar">
@@ -147,7 +143,7 @@
             <div class="lookup-row">
               <input
                 id="teacherStudentSearch"
-                placeholder="Search by Student ID or student name"
+                placeholder="Search by LRN or student name"
                 aria-label="Search student"
               /><button id="teacherSearchBtn" class="btn btn-primary">
                 Search
@@ -169,17 +165,30 @@
           </div>
           <div class="card">
             <form id="recordForm" novalidate>
+              <h4 class="form-section">Learner Profile</h4>
               <div class="grid-3">
                 <div class="field">
-                  <label for="studentId">Student ID</label
-                  ><input id="studentId" maxlength="20" required />
-                </div>
-                <div class="field">
-                  <label for="studentName">Student Full Name</label
+                  <label for="studentName">Name of Student</label
                   ><input id="studentName" maxlength="80" required />
                 </div>
                 <div class="field">
-                  <label for="gradeSection">Grade and Section</label
+                  <label for="studentId">LRN</label
+                  ><input id="studentId" inputmode="numeric" maxlength="12" placeholder="12-digit LRN" required />
+                </div>
+                <div class="field">
+                  <label for="age">Age</label
+                  ><input id="age" type="number" min="5" max="99" required />
+                </div>
+                <div class="field">
+                  <label for="sex">Sex</label
+                  ><select id="sex" required>
+                    <option value="">Select sex</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="gradeSection">Grade &amp; Section</label
                   ><input
                     id="gradeSection"
                     maxlength="50"
@@ -187,41 +196,75 @@
                     required
                   />
                 </div>
-              </div>
-              <div class="grid-2">
                 <div class="field">
-                  <label for="incidentDate">Date of Observation</label
+                  <label for="address">Address</label
+                  ><input id="address" maxlength="120" />
+                </div>
+                <div class="field">
+                  <label for="guardian">Parent/Guardian</label
+                  ><input id="guardian" maxlength="80" required />
+                </div>
+                <div class="field">
+                  <label for="contactNumber">Contact Number</label
+                  ><input id="contactNumber" type="tel" inputmode="tel" maxlength="20" placeholder="09XX XXX XXXX" required />
+                </div>
+              </div>
+
+              <h4 class="form-section">Category</h4>
+              <div class="field">
+                <label for="category">Category</label
+                ><select id="category" required>
+                  <option value="">Select category</option>
+                  <option>Academic</option>
+                  <option>Behavioral</option>
+                  <option>Attendance</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <h4 class="form-section">Observation Details</h4>
+              <div class="grid-3">
+                <div class="field">
+                  <label for="incidentDate">Date</label
                   ><input id="incidentDate" type="date" required />
                 </div>
                 <div class="field">
-                  <label for="category">Category</label
-                  ><select id="category" required>
-                    <option value="">Select category</option>
-                    <option>Academic</option>
-                    <option>Behavioral</option>
-                    <option>Attendance</option>
-                    <option>Other</option>
-                  </select>
+                  <label for="incidentTime">Time</label
+                  ><input id="incidentTime" type="time" required />
+                </div>
+                <div class="field">
+                  <label for="location">Location/Setting</label
+                  ><input id="location" maxlength="80" required />
                 </div>
               </div>
+
               <div class="field">
-                <label for="observation">Objective Observation</label
+                <label for="observation">Narrative Description</label
+                ><small class="hint">Describe the specific incident or behavior observed using factual, objective language. Focus on what was seen and heard without interpretation.</small
                 ><textarea
                   id="observation"
                   maxlength="1000"
                   rows="5"
-                  placeholder="Describe only what was directly observed"
                   required
                 ></textarea>
               </div>
               <div class="field">
-                <label for="actionTaken"
-                  >Action Taken / Immediate Intervention</label
+                <label for="actionTaken">Action Taken / Intervention</label
+                ><small class="hint">Immediate steps taken by the teacher or adviser to address the behavior or incident.</small
                 ><textarea
                   id="actionTaken"
                   maxlength="700"
                   rows="4"
                   required
+                ></textarea>
+              </div>
+              <div class="field">
+                <label for="recommendations">Recommendations / Notes</label
+                ><small class="hint">Long-term suggestions or referrals for guidance counseling if the behavior persists.</small
+                ><textarea
+                  id="recommendations"
+                  maxlength="700"
+                  rows="4"
                 ></textarea>
               </div>
               <div id="formMessage" class="message"></div>
@@ -313,9 +356,9 @@
         </button>
       </div>
     </section>
-    <script src="store.js?v=3"></script>
-    <script src="ui.js?v=3"></script>
-    <script src="pages.js?v=3"></script>
-    <script src="app.js?v=3"></script>
+    <script src="store.js"></script>
+    <script src="ui.js"></script>
+    <script src="pages.js"></script>
+    <script src="app.js"></script>
   </body>
 </html>

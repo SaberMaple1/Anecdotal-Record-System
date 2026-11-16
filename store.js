@@ -49,8 +49,6 @@ const getRecords = () => {
   const r = readJSON(localStorage, KEYS.records, []);
   return Array.isArray(r) ? r : [];
 };
-const activeRecords = () => getRecords().filter((r) => !r.deletedAt);
-const trashRecords = () => getRecords().filter((r) => r.deletedAt);
 const saveRecords = (r) => {
   if (!writeJSON(localStorage, KEYS.records, r))
     alert("Unable to save: browser storage is unavailable.");
